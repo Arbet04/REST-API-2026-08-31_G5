@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Processing Client</title>
+<style>
+  :root {
+    --bg: #1e1e2e;
+    --card: #2a2a3c;
+    --accent: #5b8def;
+    --text: #e8e8f0;
+    --muted: #9a9ab0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 32px 16px;
+  }
+  h1 { text-align: center; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: var(--muted); margin-top: 0; margin-bottom: 28px; }
+  .card {
+    max-width: 720px;
+    margin: 0 auto 24px auto;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--muted); }
+  input[type="text"], select {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background: #1a1a28;
+    color: var(--text);
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+  input[type="file"] { margin-bottom: 16px; color: var(--text); }
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #status { text-align: center; min-height: 20px; margin-top: 12px; color: var(--muted); font-size: 14px; }
+  .images {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .image-box {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 12px;
+    flex: 1 1 320px;
+    max-width: 420px;
+    text-align: center;
+  }
+  .image-box h3 { margin-top: 0; color: var(--muted); font-size: 14px; font-weight: 500; }
+  .image-box img {
+    max-width: 100%;
+    border-radius: 8px;
+    background: #111;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>Image Processing Client</h1>
+<p class="subtitle">Frontend &rarr; REST API &rarr; Backend (Edge / Corner Detection)</p>
+
+<div class="card">
+  <label for="backendUrl">Backend URL</label>
+  <input type="text" id="backendUrl" value="http://localhost:5000" placeholder="http://192.168.1.100:5000">
+
+  <label for="imageInput">Image file</label>
+  <input type="file" id="imageInput" accept="image/*">
+
+  <label for="operation">Operation</label>
+  <select id="operation">
+    <option value="edge">Edge Detection (Canny)</option>
+    <option value="corner">Corner Detection (Harris)</option>
+  </select>
+
+  <button id="submitBtn" onclick="processImage()">Upload &amp; Process</button>
+  <div id="status"></div>
+</div>
+
+<div class="images">
+  <div class="image-box">
+    <h3>Original</h3>
+    <img id="originalImage">
+  </div>
+  <div class="image-box">
+    <h3>Result</h3>
+    <img id="resultImage">
+  </div>
+</div>
+
+<script>
+async function checkHealth(backendUrl) {
+  const res = await fetch(`${backendUrl}/api/health`);
+  if (!res.ok) throw new Error("Health check failed");
+  return res.json();
+}
+
+async function processImage() {
+  const backendUrl = document.getElementById('backendUrl').value.replace(/\/$/, "");
+  const fileInput = document.getElementById('imageInput');
+  const operation = document.getElementById('operation').value;
+  const statusEl = document.getElementById('status');
+  const submitBtn = document.getElementById('submitBtn');
+  const originalImg = document.getElementById('originalImage');
+  const resultImg = document.getElementById('resultImage');
+
+  if (!fileInput.files.length) {
+    statusEl.textContent = "Please choose an image file first.";
+    return;
+  }
+
+  const file = fileInput.files[0];
+  originalImg.src = URL.createObjectURL(file);
+  originalImg.style.display = "inline-block";
+
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("operation", operation);
+
+  submitBtn.disabled = true;
+  statusEl.textContent = "Sending image to server...";
+
+  try {
+    const response = await fetch(`${backendUrl}/api/process`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!response.ok) {
+      let message = `Request failed (${response.status})`;
+      try {
+        const errJson = await response.json();
+        if (errJson.error) message = errJson.error;
+      } catch (_) { /* ignore parse errors */ }
+      statusEl.textContent = "Error: " + message;
+      return;
+    }
+
+    const blob = await response.blob();
+    resultImg.src = URL.createObjectURL(blob);
+    resultImg.style.display = "inline-block";
+    statusEl.textContent = "Done.";
+  } catch (err) {
+    statusEl.textContent = "Could not reach backend: " + err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>
