@@ -87,7 +87,6 @@
 <p class="subtitle" id="backendDisplay" style="margin-top:-20px; font-size:13px;"></p>
 
 <div class="card">
-
   <label for="imageInput">Image file</label>
   <input type="file" id="imageInput" accept="image/*">
 
@@ -113,9 +112,16 @@
 </div>
 
 <script>
+// ---------------------------------------------------------------------------
+// แก้ตรงนี้บรรทัดเดียวถ้า IP ของเครื่อง backend เปลี่ยน
+// (เช่น สลับ WiFi ใหม่ หรือรันจากเครื่องอื่น) ดู IP ได้จาก log ตอนรัน
+// python backend\app.py เช่น "* Running on http://172.20.57.75:5000"
+// ---------------------------------------------------------------------------
+const BACKEND_URL = "http://172.20.57.75:5000";
+
+document.getElementById('backendDisplay').textContent = `Backend: ${BACKEND_URL}`;
+
 async function checkHealth(backendUrl) {
-  const BACKEND_URL = "http://172.20.57.75:5000";
-  document.getElementById('backendDisplay').textContent = `Backend: ${BACKEND_URL}`;
   const res = await fetch(`${backendUrl}/api/health`);
   if (!res.ok) throw new Error("Health check failed");
   return res.json();
