@@ -84,10 +84,9 @@
 
 <h1>Image Processing Client</h1>
 <p class="subtitle">Frontend &rarr; REST API &rarr; Backend (Edge / Corner Detection)</p>
+<p class="subtitle" id="backendDisplay" style="margin-top:-20px; font-size:13px;"></p>
 
 <div class="card">
-  <label for="backendUrl">Backend URL</label>
-  <input type="text" id="backendUrl" value="http://localhost:5000" placeholder="http://192.168.1.100:5000">
 
   <label for="imageInput">Image file</label>
   <input type="file" id="imageInput" accept="image/*">
@@ -115,13 +114,15 @@
 
 <script>
 async function checkHealth(backendUrl) {
+  const BACKEND_URL = "http://172.20.57.75:5000";
+  document.getElementById('backendDisplay').textContent = `Backend: ${BACKEND_URL}`;
   const res = await fetch(`${backendUrl}/api/health`);
   if (!res.ok) throw new Error("Health check failed");
   return res.json();
 }
 
 async function processImage() {
-  const backendUrl = document.getElementById('backendUrl').value.replace(/\/$/, "");
+  const backendUrl = BACKEND_URL;
   const fileInput = document.getElementById('imageInput');
   const operation = document.getElementById('operation').value;
   const statusEl = document.getElementById('status');
