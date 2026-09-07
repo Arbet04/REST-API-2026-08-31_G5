@@ -1,131 +1,320 @@
+```html
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
+
+<!-- กำหนดรูปแบบตัวอักษรให้รองรับภาษาไทย -->
 <meta charset="UTF-8">
+
+<!-- ทำให้หน้าเว็บปรับขนาดตามหน้าจอของอุปกรณ์ -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- กำหนดชื่อเว็บไซต์ที่แสดงบนแท็บ Browser -->
 <title>Image Processing Client</title>
+
+
 <style>
-  :root {
-    --bg: #1e1e2e;
-    --card: #2a2a3c;
-    --accent: #5b8def;
-    --text: #e8e8f0;
-    --muted: #9a9ab0;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', Tahoma, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 32px 16px;
-  }
-  h1 { text-align: center; margin-bottom: 4px; }
-  .subtitle { text-align: center; color: var(--muted); margin-top: 0; margin-bottom: 28px; }
-  .card {
-    max-width: 720px;
-    margin: 0 auto 24px auto;
-    background: var(--card);
-    border-radius: 12px;
-    padding: 24px;
-  }
-  label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--muted); }
-  input[type="text"], select {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #444;
-    background: #1a1a28;
-    color: var(--text);
-    margin-bottom: 16px;
-    font-size: 14px;
-  }
-  input[type="file"] { margin-bottom: 16px; color: var(--text); }
-  button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: var(--accent);
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  button:hover { opacity: 0.9; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  #status { text-align: center; min-height: 20px; margin-top: 12px; color: var(--muted); font-size: 14px; }
-  .images {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .image-box {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 12px;
-    flex: 1 1 320px;
-    max-width: 420px;
-    text-align: center;
-  }
-  .image-box h3 { margin-top: 0; color: var(--muted); font-size: 14px; font-weight: 500; }
-  .image-box img {
-    max-width: 100%;
-    border-radius: 8px;
-    background: #111;
-    display: none;
-  }
+
+/* =========================================================
+   ส่วนกำหนดสีหลักของหน้าเว็บ
+   ========================================================= */
+:root {
+  --bg: #1e1e2e;          /* สีพื้นหลัง */
+  --card: #2a2a3c;        /* สีของกล่อง */
+  --accent: #5b8def;      /* สีปุ่ม */
+  --text: #e8e8f0;        /* สีข้อความหลัก */
+  --muted: #9a9ab0;       /* สีข้อความรอง */
+}
+
+
+/* =========================================================
+   กำหนดให้ทุก Element คำนวณขนาดรวม Padding และ Border
+   ========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ตั้งค่าพื้นฐานของหน้าเว็บ
+   ========================================================= */
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 32px 16px;
+}
+
+
+/* =========================================================
+   กำหนดรูปแบบหัวข้อหลัก
+   ========================================================= */
+h1 {
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+
+/* กำหนดรูปแบบข้อความรอง */
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 0;
+  margin-bottom: 28px;
+}
+
+
+/* =========================================================
+   รูปแบบกล่องสำหรับส่วน Upload และเลือก Operation
+   ========================================================= */
+.card {
+  max-width: 720px;
+  margin: 0 auto 24px auto;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+
+/* =========================================================
+   รูปแบบข้อความ Label
+   ========================================================= */
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+
+/* =========================================================
+   รูปแบบช่องกรอกข้อความและช่อง Select
+   ========================================================= */
+input[type="text"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #1a1a28;
+  color: var(--text);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   รูปแบบช่องเลือกไฟล์
+   ========================================================= */
+input[type="file"] {
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+
+/* =========================================================
+   รูปแบบปุ่ม Upload & Process
+   ========================================================= */
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* เปลี่ยนความโปร่งใสเมื่อเอาเมาส์ไปวางบนปุ่ม */
+button:hover {
+  opacity: 0.9;
+}
+
+
+/* ทำให้ปุ่มดูจางลงและกดไม่ได้ขณะกำลังประมวลผล */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ส่วนแสดงสถานะการทำงานของระบบ
+   เช่น Sending image to server... หรือ Done.
+   ========================================================= */
+#status {
+  text-align: center;
+  min-height: 20px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   ส่วนจัดวางรูปภาพ Original และ Result
+   ========================================================= */
+.images {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+
+/* =========================================================
+   กล่องที่ใช้แสดงรูปภาพแต่ละรูป
+   ========================================================= */
+.image-box {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 12px;
+  flex: 1 1 320px;
+  max-width: 420px;
+  text-align: center;
+}
+
+
+/* รูปแบบหัวข้อ Original และ Result */
+.image-box h3 {
+  margin-top: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   รูปแบบของรูปภาพ
+   ตอนเริ่มต้นซ่อนรูปไว้ก่อน
+   และจะแสดงเมื่อมีการเลือกรูปหรือได้รับผลลัพธ์
+   ========================================================= */
+.image-box img {
+  max-width: 100%;
+  border-radius: 8px;
+  background: #111;
+  display: none;
+}
+
 </style>
 </head>
+
+
 <body>
 
+<h1>Image Processing Client</h1>
+<p class="subtitle">Frontend &rarr; REST API &rarr; Backend (Edge / Corner Detection)</p>
 
 <div class="card">
+  <label for="backendUrl">Backend URL</label>
+  <input type="text" id="backendUrl" value="http://localhost:5000" placeholder="http://192.168.1.100:5000">
+
   <label for="imageInput">Image file</label>
+
+  <!-- ช่องสำหรับเลือกไฟล์รูปภาพจากเครื่อง -->
   <input type="file" id="imageInput" accept="image/*">
 
+
+  <!-- =====================================================
+       ส่วนเลือกวิธีการประมวลผลภาพ
+       ===================================================== -->
+
+  <!-- Label ของช่อง Operation -->
   <label for="operation">Operation</label>
+
+  <!-- ช่องสำหรับเลือกประเภทการประมวลผล -->
   <select id="operation">
-    <option value="edge">Edge Detection (Canny)</option>
-    <option value="corner">Corner Detection (Harris)</option>
+
+    <!-- ประมวลผลหาเส้นขอบด้วย Canny -->
+    <option value="edge">
+      Edge Detection (Canny)
+    </option>
+
+    <!-- ประมวลผลหาจุดมุมด้วย Harris -->
+    <option value="corner">
+      Corner Detection (Harris)
+    </option>
+
   </select>
 
-  <button id="submitBtn" onclick="processImage()">Upload &amp; Process</button>
+
+  <!-- =====================================================
+       ปุ่มสำหรับส่งรูปไปประมวลผลที่ Backend
+       เมื่อกดปุ่มจะเรียกฟังก์ชัน processImage()
+       ===================================================== -->
+
+  <button id="submitBtn" onclick="processImage()">
+    Upload &amp; Process
+  </button>
+
+
+  <!-- พื้นที่สำหรับแสดงสถานะการทำงาน -->
   <div id="status"></div>
+
 </div>
+
+
+<!-- =======================================================
+     ส่วนแสดงภาพ Original และ Result
+     ======================================================= -->
 
 <div class="images">
+
+
+  <!-- กล่องแสดงภาพต้นฉบับ -->
   <div class="image-box">
+
+    <!-- ชื่อส่วนแสดงภาพต้นฉบับ -->
     <h3>Original</h3>
+
+    <!-- รูปภาพต้นฉบับ -->
     <img id="originalImage">
+
   </div>
+
+
+  <!-- กล่องแสดงภาพผลลัพธ์ -->
   <div class="image-box">
+
+    <!-- ชื่อส่วนแสดงภาพผลลัพธ์ -->
     <h3>Result</h3>
+
+    <!-- รูปภาพที่ได้รับกลับมาจาก Backend -->
     <img id="resultImage">
+
   </div>
+
 </div>
 
+
 <script>
-// ---------------------------------------------------------------------------
-// แก้ตรงนี้บรรทัดเดียวถ้า IP ของเครื่อง backend เปลี่ยน
-// (เช่น สลับ WiFi ใหม่ หรือรันจากเครื่องอื่น) ดู IP ได้จาก log ตอนรัน
-// python backend\app.py เช่น "* Running on http://"
-// ---------------------------------------------------------------------------
-const BACKEND_URL = "http://172.20.56.193:5000";
-
-document.getElementById('backendDisplay').textContent = `Backend: ${BACKEND_URL}`;
-
 async function checkHealth(backendUrl) {
+
+  // ส่ง Request ไปยัง Backend
   const res = await fetch(`${backendUrl}/api/health`);
-  if (!res.ok) throw new Error("Health check failed");
+
+  // ถ้า Backend ตอบกลับไม่สำเร็จ ให้แจ้ง Error
+  if (!res.ok)
+    throw new Error("Health check failed");
+
+  // รับข้อมูล JSON ที่ Backend ส่งกลับมา
   return res.json();
 }
 
+
+// ===========================================================
+// ฟังก์ชันหลักสำหรับ Upload และประมวลผลรูปภาพ
+// ===========================================================
+
 async function processImage() {
-  const backendUrl = BACKEND_URL;
+  const backendUrl = document.getElementById('backendUrl').value.replace(/\/$/, "");
   const fileInput = document.getElementById('imageInput');
   const operation = document.getElementById('operation').value;
   const statusEl = document.getElementById('status');
@@ -134,48 +323,164 @@ async function processImage() {
   const resultImg = document.getElementById('resultImage');
 
   if (!fileInput.files.length) {
-    statusEl.textContent = "Please choose an image file first.";
+
+    // ถ้ายังไม่ได้เลือกไฟล์ ให้แสดงข้อความแจ้งเตือน
+    statusEl.textContent =
+      "Please choose an image file first.";
+
+    // หยุดการทำงานของฟังก์ชัน
     return;
   }
 
-  const file = fileInput.files[0];
-  originalImg.src = URL.createObjectURL(file);
-  originalImg.style.display = "inline-block";
 
+  // =========================================================
+  // นำรูปที่ผู้ใช้เลือกมาแสดงในส่วน Original
+  // =========================================================
+
+  // ดึงไฟล์รูปภาพไฟล์แรกที่ผู้ใช้เลือก
+  const file = fileInput.files[0];
+
+  // สร้าง URL ชั่วคราวสำหรับแสดงรูปภาพ
+  originalImg.src =
+    URL.createObjectURL(file);
+
+  // ทำให้รูป Original แสดงบนหน้าเว็บ
+  originalImg.style.display =
+    "inline-block";
+
+
+  // =========================================================
+  // เตรียมข้อมูลสำหรับส่งไป Backend
+  // =========================================================
+
+  // สร้าง FormData สำหรับเก็บข้อมูลที่จะส่ง
   const formData = new FormData();
+
+  // เพิ่มไฟล์รูปภาพลงใน FormData
   formData.append("image", file);
+
+  // เพิ่มประเภท Operation ลงใน FormData
+  // ค่าอาจเป็น edge หรือ corner
   formData.append("operation", operation);
 
+
+  // =========================================================
+  // เตรียมสถานะก่อนส่งข้อมูล
+  // =========================================================
+
+  // ปิดปุ่มชั่วคราวเพื่อป้องกันการกดซ้ำ
   submitBtn.disabled = true;
-  statusEl.textContent = "Sending image to server...";
+
+  // แสดงข้อความว่ากำลังส่งรูปไปยัง Server
+  statusEl.textContent =
+    "Sending image to server...";
+
+
+  // =========================================================
+  // เริ่มติดต่อกับ Backend
+  // =========================================================
 
   try {
-    const response = await fetch(`${backendUrl}/api/process`, {
-      method: "POST",
-      body: formData
-    });
+
+    // ส่งรูปภาพและ Operation ไปยัง API ของ Backend
+    const response = await fetch(
+      `${backendUrl}/api/process`,
+      {
+        // ใช้ HTTP Method แบบ POST
+        method: "POST",
+
+        // ส่งข้อมูลในรูปแบบ FormData
+        body: formData
+      }
+    );
+
+
+    // =======================================================
+    // ตรวจสอบว่า Backend ประมวลผลสำเร็จหรือไม่
+    // =======================================================
 
     if (!response.ok) {
-      let message = `Request failed (${response.status})`;
+
+      // สร้างข้อความ Error เบื้องต้น
+      const message =
+        `Request failed (${response.status})`;
+
       try {
-        const errJson = await response.json();
-        if (errJson.error) message = errJson.error;
-      } catch (_) { /* ignore parse errors */ }
-      statusEl.textContent = "Error: " + message;
+
+        // พยายามอ่านข้อมูล Error จาก Backend
+        const errJson =
+          await response.json();
+
+        // ถ้า Backend ส่งข้อความ error มา
+        // ให้นำมาใช้แสดงแทนข้อความเดิม
+        if (errJson.error)
+          message = errJson.error;
+
+      } catch (_) {
+
+        // ถ้าอ่านข้อมูล Error ไม่ได้
+        // ให้ข้ามไปโดยไม่ทำอะไร
+      }
+
+
+      // แสดงข้อความ Error บนหน้าเว็บ
+      statusEl.textContent =
+        "Error: " + message;
+
+      // หยุดการทำงาน
       return;
     }
 
-    const blob = await response.blob();
-    resultImg.src = URL.createObjectURL(blob);
-    resultImg.style.display = "inline-block";
-    statusEl.textContent = "Done.";
+
+    // =======================================================
+    // รับผลลัพธ์รูปภาพจาก Backend
+    // =======================================================
+
+    // รับข้อมูลที่ Backend ส่งกลับมาเป็น Blob
+    const blob =
+      await response.blob();
+
+
+    // สร้าง URL ชั่วคราวจาก Blob
+    // เพื่อนำไปแสดงเป็นรูปภาพ
+    resultImg.src =
+      URL.createObjectURL(blob);
+
+
+    // ทำให้รูป Result แสดงบนหน้าเว็บ
+    resultImg.style.display =
+      "inline-block";
+
+
+    // แสดงสถานะว่าการประมวลผลเสร็จแล้ว
+    statusEl.textContent =
+      "Done.";
+
+
+  // =========================================================
+  // กรณีไม่สามารถเชื่อมต่อกับ Backend ได้
+  // =========================================================
+
   } catch (err) {
-    statusEl.textContent = "Could not reach backend: " + err.message;
+
+    // แสดงข้อความ Error ที่เกิดขึ้น
+    statusEl.textContent =
+      "Could not reach backend: " + err.message;
+
+
+  // =========================================================
+  // ส่วนนี้ทำงานเสมอ ไม่ว่าจะสำเร็จหรือเกิด Error
+  // =========================================================
+
   } finally {
+
+    // เปิดปุ่ม Upload & Process กลับมาใช้งาน
     submitBtn.disabled = false;
   }
 }
+
 </script>
 
 </body>
 </html>
+```
